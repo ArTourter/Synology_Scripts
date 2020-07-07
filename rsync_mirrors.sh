@@ -4,7 +4,10 @@ set -e
 
 TARGET=/volume1/web/mirrors
 SLACKSRC=slackware.uk::slackware
-SLACKREL=slackware.uk::people
+SLACK_MULTI_SRV=slackware.uk
+SLACK_MULTI_PATH=people/alien/multilib
+SLACK_KTOWN_SRV=slackware.uk
+SLACK_KTOWN_PATH=people/alien-kde
 TEXLIVESRC=distrib-coffee.ipsl.jussieu.fr::pub/mirrors/ctan/systems/texlive/tlnet
 
 [ -f $TARGET/.syncing ] && exit 0
@@ -23,20 +26,31 @@ sync_slackware () {
 
 sync_multilib () {
 	VERSION=$1
-	PATH=alien/multilib
-	[ ! -d $TARGET/$PATH ] && /bin/mkdir -p $TARGET/people/$PATH
-	/bin/rsync $RSYNC_OPTS --delete $SLACKREL/$PATH/$VERSION $TARGET/people/$PATH/
+	[ ! -d $TARGET/$SLACK_MULTI_PATH ] && /bin/mkdir -p $TARGET/$SLACK_MULTI_PATH
+	/bin/rsync \
+		$RSYNC_OPTS --delete \
+		--include="$VERSION/***" \
+		--include='[A-Z]*' \
+		--exclude='*' \
+		$SLACK_MULTI_SRV::$SLACK_MULTI_PATH/ $TARGET/$SLACK_MULTI_PATH/
 }
 
 sync_ktown() {
-	PATH=alien-kde/current/latest
-	[ ! -d $TARGET/$PATH ] && /bin/mkdir -p $TARGET/people/$PATH
-	/bin/rsync $RSYNC_OPTS --delete $SLACKREL/$PATH/x86_64 $TARGET/people/$PATH/
+	VERSION=${1:-"current"}
+	[ ! -d $TARGET/$SLACK_KTOWN_PATH ] && /bin/mkdir -p $TARGET/$SLACK_KTOWN_PATH
+	/bin/rsync \
+		$RSYNC_OPTS --delete \
+		--include='[A-Z]*' \
+		--include="$VERSION/"{,'latest','5/'{,'x86_64***'}} \
+		--exclude='*' \
+		$SLACK_KTOWN_SRV::$SLACK_KTOWN_PATH/ $TARGET/$SLACK_KTOWN_PATH/
 }
 
 sync_texlive () {
 	[ ! -d $TARGET/texlive ] && /bin/mkdir $TARGET/texlive
-	/bin/rsync $RSYNC_OPTS --delete $TEXLIVESRC $TARGET/texlive/
+	/bin/rsync \
+		$RSYNC_OPTS --delete \
+		$TEXLIVESRC $TARGET/texlive/
 }
 
 echo "syncing slackware64 current ..."
