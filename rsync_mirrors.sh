@@ -3,12 +3,13 @@
 set -e
 
 TARGET=/volume1/web/mirrors
-SLACKSRC=slackware.uk::slackware
+SLACKSRC=rsync.osuosl.org::slackware
 SLACK_MULTI_SRV=slackware.uk
 SLACK_MULTI_PATH=people/alien/multilib
 SLACK_KTOWN_SRV=slackware.uk
 SLACK_KTOWN_PATH=people/alien-kde
-TEXLIVESRC=distrib-coffee.ipsl.jussieu.fr::pub/mirrors/ctan/systems/texlive/tlnet
+TEXLIVE_SRV=rsync.cs.uu.nl
+TEXLIVE_PATH=CTAN/systems/texlive/tlnet
 
 [ -f $TARGET/.syncing ] && exit 0
 
@@ -17,6 +18,12 @@ TEXLIVESRC=distrib-coffee.ipsl.jussieu.fr::pub/mirrors/ctan/systems/texlive/tlne
 RSYNC_OPTS="-avh --progress --stats"
 
 [ ! -d "$TARGET" ] && /bin/mkdir -p $TARGET
+
+on_exit () {
+	[ -f $TARGET/.syncing ] && /bin/rm -f $TARGET/.syncing
+}
+
+trap on_exit ERR
 
 sync_slackware () {
 	VERSION=$1
@@ -50,7 +57,7 @@ sync_texlive () {
 	[ ! -d $TARGET/texlive ] && /bin/mkdir $TARGET/texlive
 	/bin/rsync \
 		$RSYNC_OPTS --delete \
-		$TEXLIVESRC $TARGET/texlive/
+		$TEXLIVE_SRV::$TEXLIVE_PATH $TARGET/texlive/
 }
 
 echo "syncing slackware64 current ..."
