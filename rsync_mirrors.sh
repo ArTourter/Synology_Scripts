@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-set -e
+set -eE
 
 TARGET=/volume1/web/mirrors
 SLACKSRC=rsync.osuosl.org::slackware
@@ -15,11 +15,12 @@ TEXLIVE_PATH=CTAN/systems/texlive/tlnet
 
 /bin/touch $TARGET/.syncing
 
-RSYNC_OPTS="-avh --progress --stats"
+RSYNC_OPTS="-avh --progress --stats --timeout=60"
 
 [ ! -d "$TARGET" ] && /bin/mkdir -p $TARGET
 
 on_exit () {
+	echo "This script has exited in error"
 	[ -f $TARGET/.syncing ] && /bin/rm -f $TARGET/.syncing
 }
 
