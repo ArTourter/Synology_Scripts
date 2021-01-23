@@ -4,10 +4,12 @@ set -eE
 
 TARGET=/volume1/web/mirrors
 SLACKSRC=rsync.osuosl.org::slackware
-SLACK_MULTI_SRV=slackware.uk
-SLACK_MULTI_PATH=people/alien/multilib
-SLACK_KTOWN_SRV=slackware.uk
-SLACK_KTOWN_PATH=people/alien-kde
+SLACK_MULTI_SRV=slackware.nl
+SLACK_MULTI_PATH=mirrors/people/alien/multilib
+SLACK_MULTI_LPATH=people/alien/multilib
+SLACK_KTOWN_SRV=slackware.nl
+SLACK_KTOWN_PATH=mirrors/alien-kde
+SLACK_KTOWN_LPATH=people/alien-kde
 TEXLIVE_SRV=rsync.cs.uu.nl
 TEXLIVE_PATH=CTAN/systems/texlive/tlnet
 
@@ -34,24 +36,24 @@ sync_slackware () {
 
 sync_multilib () {
 	VERSION=$1
-	[ ! -d $TARGET/$SLACK_MULTI_PATH ] && /bin/mkdir -p $TARGET/$SLACK_MULTI_PATH
+	[ ! -d $TARGET/$SLACK_MULTI_LPATH ] && /bin/mkdir -p $TARGET/$SLACK_MULTI_LPATH
 	/bin/rsync \
 		$RSYNC_OPTS --delete \
 		--include="$VERSION/***" \
 		--include='[A-Z]*' \
 		--exclude='*' \
-		$SLACK_MULTI_SRV::$SLACK_MULTI_PATH/ $TARGET/$SLACK_MULTI_PATH/
+		$SLACK_MULTI_SRV::$SLACK_MULTI_PATH/ $TARGET/$SLACK_MULTI_LPATH/
 }
 
 sync_ktown() {
 	VERSION=${1:-"current"}
-	[ ! -d $TARGET/$SLACK_KTOWN_PATH ] && /bin/mkdir -p $TARGET/$SLACK_KTOWN_PATH
+	[ ! -d $TARGET/$SLACK_KTOWN_LPATH ] && /bin/mkdir -p $TARGET/$SLACK_KTOWN_LPATH
 	/bin/rsync \
 		$RSYNC_OPTS --delete \
 		--include='[A-Z]*' \
 		--include="$VERSION/"{,'latest','5/'{,'x86_64***'}} \
 		--exclude='*' \
-		$SLACK_KTOWN_SRV::$SLACK_KTOWN_PATH/ $TARGET/$SLACK_KTOWN_PATH/
+		$SLACK_KTOWN_SRV::$SLACK_KTOWN_PATH/ $TARGET/$SLACK_KTOWN_LPATH/
 }
 
 sync_texlive () {
